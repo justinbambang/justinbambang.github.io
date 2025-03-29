@@ -1,0 +1,144 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    
+        display: flex; /* Use flexbox for centering */
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        height: 100vh; /* Full height of the viewport */
+    
+}
+.opening {
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center; /* Center items vertically */
+    align-items: center; /* Center items horizontally */
+    text-align: center; /* Center the text */
+    margin: 2rem; /* Add some margin for spacing */
+    padding: 2rem; /* Add padding for better visibility */
+    background-size: cover; /* Ensure the image covers the content area */
+    backdrop-filter: blur(10px); /* Apply blur effect */
+    border-radius: 1rem; /* Optional: rounded corners */
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+    max-width: 90%; /* Set a maximum width for the box */
+    width: 100%; /* Allow it to take full width up to the max-width */
+}
+
+.opening h2 {
+    font-size: 3,5em; /* Increase font size */
+    font-family: PT Serif ;
+}
+
+.opening button {
+    padding: 10px 20px; /* Increase button size */
+    font-size: 1em; /* Increase button font size */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded button corners */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+.opening button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+.container {
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center; /* Center items vertically */
+    align-items: center; /* Center items horizontally */
+    text-align: center; /* Center the text */
+    margin: 2rem; /* Add some margin for spacing */
+    padding: 2rem; /* Add padding for better visibility */
+    background-size: cover; /* Ensure the image covers the content area */
+    backdrop-filter: blur(10px); /* Apply blur effect */
+    border-radius: 3rem; /* Optional: rounded corners */
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+    max-width: 100%; /* Set a maximum width for the box */
+    width: 100%; /* Allow it to take full width up to the max-width */
+    font-size: 1em;
+
+}
+.content button {
+    padding: 5px 13px; /* Increase button size */
+    font-size: 1em; /* Increase button font size */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded button corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    
+}
+
+.content button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+@media (max-width: 768px) {
+    .text {
+        font-size: 50vw; /* Responsive size for mobile */
+        box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5); /* Box shadow for mobile */
+        top: -200vw; /* Adjust for mobile */
+    }
+}
+
+
+.background{
+    background-image: url("foto.webp");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+}
+
+
+.content {
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center; /* Center items vertically */
+    align-items: center; /* Center items horizontally */
+    text-align: center; /* Center the text */
+    margin: 2rem; /* Add some margin for spacing */
+    padding: 2rem; /* Add padding for better visibility */
+    background-size: cover; /* Ensure the image covers the content area */
+    backdrop-filter: blur(10px); /* Apply blur effect */
+    border-radius: 3rem; /* Optional: rounded corners */
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+    max-width: 50%; /* Set a maximum width for the box */
+    width: 100%; /* Allow it to take full width up to the max-width */
+    font-size: 1em;
+}
+
+@media (max-width: 768px) {
+    .content {
+        padding: 1rem; /* Adjust padding for mobile */
+        margin: 1rem; /* Adjust margin for mobile */
+    }
+}
+
+h1 {
+    color: #e63946;
+}
+
+#message {
+    font-size: 1.2em;
+    margin: 20px 0;
+}
+
+.lyrics {
+    position: relative;
+    height: 50px;
+    overflow: hidden;
+}
+/*
+#lyricText {
+    position: absolute;
+    white-space: nowrap;
+    animation: move 10s linear infinite;
+}
+
+@keyframes move {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
