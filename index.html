@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ular Tangga Matematika - (Optimized)</title>
+  <style>
+:root{--cell:56px;--glass:rgba(255,255,255,.95)}*{box-sizing:border-box}html,body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;background:url('https://cdn.discordapp.com/attachments/1427128686469189686/1447538062610534440/gamvar.jpg?ex=6937fc60&is=6936aae0&hm=504fa44d5d1d543fb13ae4de446cdf998663b64f2790e05ec01b342ce021f925&') center/cover no-repeat;padding:12px;color:#111}body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;min-height:100vh;display:flex;gap:12px;flex-wrap:wrap;background: transparent;padding:12px;color:#111}
+.left{position:relative;min-width:calc(var(--cell)*10 + 20px)}
+.board{position:relative;display:grid;grid-template-columns:repeat(10,var(--cell));grid-auto-rows:var(--cell);border-radius:12px;overflow:hidden;border:3px solid rgba(0,0,0,.2);background:rgba(255,255,255,0.15);backdrop-filter:blur(0px);box-shadow:0 12px 24px rgba(0,0,0,.18)}
+.cell{border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;position:relative;padding:2px;font-size:12px;background:rgba(255,255,255,0.20)!important;backdrop-filter:blur(3px);}.cell .num{position:absolute;top:4px;left:6px;font-size:11px;color:#333;font-weight:700}
+.cell .num{position:absolute;top:4px;left:6px;font-size:11px;color:#333;font-weight:700}
+.player-dot{width:36px;height:36px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform .18s}
+.player-dot img{width:100%;height:100%;object-fit:cover}
+.controls{max-width:520px;width:100%}
+.panel{background:rgba(255,255,255,0.20);backdrop-filter:blur(1px);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.35);box-shadow:0 8px 20px rgba(0,0,0,.12)}
+button{padding:8px 12px;border-radius:999px;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:white;font-weight:600;cursor:pointer;transition:transform .12s}
+button:hover{transform:translateY(-2px)}
+.badge{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.05);backdrop-filter:blur(3px);border:1px solid rgba(255,255,255,0.25);font-size:12px;font-weight:600;color:#fff;}
+.log{height:140px;overflow:auto;background:rgba(255,255,255,0.05);backdrop-filter:blur(3px);padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);margin-top:8px;font-size:13px;}
+.dice{width:44px;height:44px;border-radius:10px;background:#222;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800}
+.shake{animation:shake .5s}
+@keyframes shake{0%{transform:rotate(0deg)}25%{transform:rotate(10deg)}50%{transform:rotate(-10deg)}75%{transform:rotate(8deg)}100%{transform:rotate(0)}}
+.ladder-rail{stroke:#b06b00;stroke-width:5;stroke-linecap:round}
+.ladder-rung{stroke:#ffd25a;stroke-width:3}
+.snake-body{stroke:#2f9e44;stroke-width:8;fill:none;stroke-linecap:round}
+.snake-head{fill:#2f9e44}
+.snake-eye{fill:white}
+.snake-pupil{fill:black}
+.snake-tongue{stroke:#b32424;stroke-width:3}
+.snake-mouth{fill:none;stroke:#111;stroke-width:2}
+.shake-cam{animation:camshake .35s}
+@keyframes camshake{0%{transform:translate(0)}25%{transform:translate(6px)}50%{transform:translate(-6px)}75%{transform:translate(4px)}100%{transform:translate(0)}}
+.glow{animation:glow .6s}
+@keyframes glow{0%{box-shadow:0 0 0 rgba(255,215,0,0)}50%{box-shadow:0 0 20px 8px rgba(255,215,0,.85)}100%{box-shadow:0 0 0 rgba(255,215,0,0)}}
+@media (max-width:900px){body{flex-direction:column;align-items:center}.player-dot{width:30px;height:30px}}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:1000}
+.modal.active{display:flex}
+@media print{body{background:white}.start,.controls button:not(#exportBtn){display:none}}
+  .overlay { position:absolute; inset:0; pointer-events:none; z-index:20; }
+.board { position:relative; z-index:10; }
+</style>
+</head>
+<body>
+<!-- Minimal DOM & single-source of truth; JS handles dynamic sections -->
+<div class="left" id="camera">
+  <div class="board" id="board" aria-hidden="false"></div>
+  <svg class="overlay" id="overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+</div>
+
+<div class="controls">
+  <div class="panel" id="uiPanel">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h3 style="margin:0">Ular Tangga Matematika</h3>
+        <small id="kelasLabel">&nbsp;</small>
+      </div>
+      <div style="text-align:right"><div id="turnInfo">Giliran: -</div></div>
+    </div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+      <button id="rollBtn">Roll</button>
+      <div class="dice" id="diceBox">-</div>
+      <button id="resetBtn">Reset Ronde</button>
+      <button id="menuBtn">Menu</button>
+      <button id="exportBtn">Export PDF</button>
+    </div>
+
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="badge">⚡ Kecepatan Animasi
+        <input id="speedSlider" type="range" min="40" max="300" value="120" step="10" style="width:100%" />
+        <div id="speedLabel">120 ms / langkah</div>
+      </div>
+      <div class="badge">🎲 Probabilitas Dadu
+        <select id="diceBias"><option value="fair">Adil</option><option value="high">Sering Besar</option><option value="low">Sering Kecil</option><option value="custom">Custom</option></select>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span class="badge">🔊 Sound</span>
+      <button id="toggleSoundBtn">ON</button>
+      <label style="margin-left:8px">Volume</label>
+      <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.40" />
+    </div>
+
+    <h4 style="margin-top:10px;margin-bottom:6px">Leaderboard (Turnamen)</h4>
+    <div class="leaderboard" id="leaderboard"></div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<div class="modal" id="mathModal">
+  <div class="modal-card panel" style="max-width:360px;">
+    <h3 id="modalTitle">Soal</h3>
+    <div id="modalQuestion" style="font-size:20px;margin-top:8px"></div>
+    <input type="number" id="modalAnswer" placeholder="Jawaban" style="margin-top:8px;padding:8px;border-radius:8px;border:1px solid #ddd;width:100%" />
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button id="modalSubmit">OK</button></div>
+  </div>
+</div>
+
+<!-- Start screen kept minimal and off DOM until needed -->
+<div id="startScreen" class="modal active" aria-hidden="false">
+  <div class="start-card panel" style="max-width:520px;margin:20px;">
+    <h2 style="margin:6px 0">🎲 Turnamen Ular Tangga Matematika</h2>
+    <p style="margin:6px 0">Masukkan Nama Pemain & pilih ikon (opsional)</p>
+    <input id="kelasInput" placeholder="Nama Kelas (contoh: X RPL 1)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-bottom:8px" />
+    <div id="playersForm"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button id="startBtn">Mulai Turnamen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// IIFE to avoid globals, cache nodes and minimize DOM operations
+(() => {
+  'use strict';
+  // Config
+  const PLAYER_COUNT = 6, SQUARES = 100;
+  const LADDERS = new Map([[2,23],[8,34],[20,77],[32,68],[41,79],[74,88]]);
+  const SNAKES = new Map([[16,6],[46,25],[49,11],[62,19],[64,60],[95,75]]);
+  const QUESTION_SQUARES = new Set([4,7,13,17,21,27,31,35,39,43,47,51]);
+  const PUNISHMENTS = ["Menyanyi 1 lagu!","Push up 10 kali!","Jumping jack 15 kali!","Tepuk tangan sambil berdiri!"];
+
+  // Cached DOM
+  const boardEl = document.getElementById('board');
+  const overlay = document.getElementById('overlay');
+  const rollBtn = document.getElementById('rollBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const menuBtn = document.getElementById('menuBtn');
+  const diceBox = document.getElementById('diceBox');
+  const logEl = document.getElementById('log');
+  const leaderboardEl = document.getElementById('leaderboard');
+  const turnInfo = document.getElementById('turnInfo');
+  const kelasLabel = document.getElementById('kelasLabel');
+  const startBtn = document.getElementById('startBtn');
+  const startScreen = document.getElementById('startScreen');
+  const modal = document.getElementById('mathModal');
+  const modalQ = document.getElementById('modalQuestion');
+  const modalI = document.getElementById('modalAnswer');
+  const modalS = document.getElementById('modalSubmit');
+  const toggleSoundBtn = document.getElementById('toggleSoundBtn');
+  const volumeSlider = document.getElementById('volumeSlider');
+  const speedSlider = document.getElementById('speedSlider');
+  const speedLabel = document.getElementById('speedLabel');
+  const diceBias = document.getElementById('diceBias');
+  const kelasInput = document.getElementById('kelasInput');
+  const playersForm = document.getElementById('playersForm');
+  const camera = document.getElementById('camera') || document.body;
+
+  // Audio setup (simplified: use Audio elements for background; WebAudio for effects kept lightweight)
+  let soundEnabled = true; const bgm = new Audio('backsound.mp3'); bgm.loop = true; bgm.volume = 0.3;
+  function startBGM(){ if(soundEnabled) bgm.play().catch(()=>{}); }
+  function stopBGM(){ bgm.pause(); bgm.currentTime = 0; }
+
+  // State
+  const colors = ['#ff6b6b','#5f9bff','#ffd93d','#6be7a7','#ff9cee','#9b5de5'];
+  const players = []; // objects {name,pos,score,color,icon,el}
+  let active = 0; let dice = 0; let stepSpeed = Number(speedSlider.value); let diceMode = 'fair';
+
+  // Precompute cell coordinates to reduce getBoundingClientRect calls
+  let cellCenters = new Array(SQUARES + 1);
+  let boardRect = null;
+
+  function log(msg){ const d=document.createElement('div'); d.textContent = msg; logEl.prepend(d); }
+
+  // Build start form dynamically (reduces static DOM)
+  function buildPlayersForm(){ playersForm.innerHTML = ''; for(let i=0;i<PLAYER_COUNT;i++){ const div=document.createElement('div'); div.style.display='grid'; div.style.gridTemplateColumns='1fr 80px'; div.style.gap='8px'; div.style.marginBottom='6px'; const input=document.createElement('input'); input.id=`p${i+1}`; input.placeholder=`Player ${i+1}`; input.style.padding='8px'; input.style.borderRadius='8px'; input.style.border='1px solid #ddd'; const file=document.createElement('input'); file.type='file'; file.accept='image/*'; file.id=`icon${i+1}`; div.appendChild(input); div.appendChild(file); playersForm.appendChild(div);} }
+  buildPlayersForm();
+
+  // Efficient board build using DocumentFragment
+  function buildBoard(){ boardEl.innerHTML=''; overlay.innerHTML=''; const frag = document.createDocumentFragment();
+    const rows = [];
+    for(let r=0;r<10;r++){ const base = r*10 + 1; let row = Array.from({length:10}, (_,i)=> base + i); if(r%2===1) row.reverse(); rows.push(row); }
+    rows.reverse().flat().forEach(n => {
+      const c = document.createElement('div'); c.className = 'cell'; c.id = 'cell-' + n;
+      const num = document.createElement('div'); num.className = 'num'; num.textContent = n; c.appendChild(num);
+      frag.appendChild(c);
+    });
+    boardEl.appendChild(frag);
+    // compute centers once board is laid out
+    requestAnimationFrame(computeCellCenters);
+  }
+
+  function computeCellCenters(){ boardRect = boardEl.getBoundingClientRect(); const cells = boardEl.children; for(let i=0;i<cells.length;i++){ const el = cells[i]; const n = Number(el.id.split('-')[1]); const r = el.getBoundingClientRect(); cellCenters[n] = { x: r.left - boardRect.left + r.width/2, y: r.top - boardRect.top + r.height/2 }; }
+    drawPaths(); renderPlayers(); }
+
+  // Draw ladders/snakes batched into SVG strings (much cheaper than many DOM ops)
+  function drawPaths(){ const w = boardEl.clientWidth, h = boardEl.clientHeight; overlay.setAttribute('viewBox', `0 0 ${w} ${h}`); overlay.setAttribute('width', w); overlay.setAttribute('height', h);
+    let svg = '';
+    function ladderPath(f,t){ const p1 = cellCenters[f], p2 = cellCenters[t]; if(!p1 || !p2) return ''; const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy), ux=dx/len, uy=dy/len, px=-uy*10, py=ux*10; let out = `<line class="ladder-rail" x1="${p1.x+px}" y1="${p1.y+py}" x2="${p2.x+px}" y2="${p2.y+py}"/>`;
+      out += `<line class="ladder-rail" x1="${p1.x-px}" y1="${p1.y-py}" x2="${p2.x-px}" y2="${p2.y-py}"/>`;
+      const steps = 7; for(let i=1;i<steps;i++){ const tfrac=i/steps; const cx=p1.x+dx*tfrac, cy=p1.y+dy*tfrac; out += `<line class="ladder-rung" x1="${cx+px}" y1="${cy+py}" x2="${cx-px}" y2="${cy-py}"/>`; }
+      out += `<text x="${(p1.x+p2.x)/2}" y="${(p1.y+p2.y)/2}" font-size="12" fill="#333">${f}→${t}</text>`; return out; }
+    function snakePath(f,t){ const p1=cellCenters[f], p2=cellCenters[t]; if(!p1||!p2) return ''; const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2; const d = `M ${p1.x} ${p1.y} C ${mx-40} ${my+35}, ${mx+40} ${my-35}, ${p2.x} ${p2.y}`; let out = `<path class="snake-body" d="${d}"/>`;
+      out += `<circle class="snake-head" cx="${p2.x}" cy="${p2.y}" r="9"/>`;
+      out += `<circle class="snake-eye" cx="${p2.x-3}" cy="${p2.y-3}" r="2"/>`;
+      out += `<circle class="snake-eye" cx="${p2.x+3}" cy="${p2.y-3}" r="2"/>`;
+      out += `<path class="snake-mouth" d="M ${p2.x-5} ${p2.y+3} Q ${p2.x} ${p2.y+8}, ${p2.x+5} ${p2.y+3}"/>`;
+      out += `<line class="snake-tongue" x1="${p2.x}" y1="${p2.y+6}" x2="${p2.x}" y2="${p2.y+14}"/>`;
+      out += `<text x="${(p1.x+p2.x)/2}" y="${(p1.y+p2.y)/2}" font-size="12" fill="#333">${f}→${t}</text>`; return out; }
+    LADDERS.forEach((t,f)=> svg += ladderPath(f,t)); SNAKES.forEach((t,f)=> svg += snakePath(f,t)); overlay.innerHTML = svg; }
+
+  // Reuse element for each player instead of rebuild
+  function createOrGetPlayerEl(p){ if(p.el) return p.el; const el = document.createElement('div'); el.className='player-dot'; el.style.width='36px'; el.style.height='36px'; el.style.border='2px solid #fff'; el.style.boxShadow='0 6px 16px rgba(0,0,0,.12)'; if(p.icon){ const img=document.createElement('img'); img.src=p.icon; el.appendChild(img); } else { el.style.background = p.color; }
+    p.el = el; return el; }
+
+  function renderPlayers(){ // clear existing placements then append
+    // remove all player-dots from cells (cheap) but keep p.el references
+    const cells = boardEl.querySelectorAll('.cell'); cells.forEach(c => { const old = c.querySelectorAll('.player-dot'); old.forEach(o=>o.remove()); });
+    players.forEach(p=>{ const pos = Math.max(1, Math.min(SQUARES, p.pos || 1)); const cell = document.getElementById('cell-'+pos); if(!cell) return; const el = createOrGetPlayerEl(p); // clone node to allow multiple players same cell
+      const node = el.cloneNode(true); cell.appendChild(node); }); }
+
+  // Smooth step animation using requestAnimationFrame
+  function animateStep(player, steps, cb){ const start = player.pos || 1; const target = Math.min(SQUARES, start + steps); const startTime = performance.now(); const durationPerStep = Math.max(40, stepSpeed); const totalDuration = durationPerStep * (target - start);
+    function frame(now){ const t = Math.min(1, (now - startTime) / totalDuration); const progressed = Math.floor((target - start) * t); player.pos = start + progressed; renderPlayers(); if(t < 1) requestAnimationFrame(frame); else { player.pos = target; renderPlayers(); cb && cb(); } }
+    requestAnimationFrame(frame);
+  }
+
+  // Animate across snake/ladder path using absolute floating element
+  function animateAlongPath(player, from, to, cb){ const start = cellCenters[from], end = cellCenters[to]; if(!start || !end){ player.pos = to; renderPlayers(); cb && cb(); return; }
+    const floatEl = document.createElement('div'); floatEl.className='player-dot'; floatEl.style.position='absolute'; floatEl.style.left = (start.x - 18) + 'px'; floatEl.style.top = (start.y - 18) + 'px'; floatEl.style.width='36px'; floatEl.style.height='36px'; floatEl.style.zIndex = 9999; if(player.icon){ const img = document.createElement('img'); img.src = player.icon; floatEl.appendChild(img); } else { floatEl.style.background = player.color; }
+    camera.appendChild(floatEl);
+    const duration = Math.max(250, stepSpeed * 3);
+    const t0 = performance.now(); function f(now){ const t = Math.min(1, (now - t0)/duration); const x = start.x + (end.x - start.x) * t; const y = start.y + (end.y - start.y) * t; floatEl.style.left = (x - 18) + 'px'; floatEl.style.top = (y - 18) + 'px'; if(t < 1) requestAnimationFrame(f); else { floatEl.remove(); player.pos = to; renderPlayers(); cb && cb(); } }
+    requestAnimationFrame(f);
+  }
+
+  function checkSnakeOrLadder(player){ const pos = player.pos; if(LADDERS.has(pos)){ const to = LADDERS.get(pos); log(`📈 ${player.name} naik tangga ${pos} → ${to}`); document.getElementById('cell-'+pos).classList.add('glow'); setTimeout(()=>document.getElementById('cell-'+pos).classList.remove('glow'),700); animateAlongPath(player,pos,to,()=>afterMove(player)); return true; }
+    if(SNAKES.has(pos)){ const to = SNAKES.get(pos); log(`🐍 ${player.name} turun ular ${pos} → ${to}`); camera.classList.add('shake-cam'); setTimeout(()=>camera.classList.remove('shake-cam'),350); animateAlongPath(player,pos,to,()=>afterMove(player)); return true; } return false; }
+
+  function afterMove(player){ if(player.pos === SQUARES){ player.score = (player.score || 0) + 1; updateLB(); setTimeout(()=>alert(`🏆 ${player.name} MENANG RONDE!`),50); resetRound(); return; }
+    if(QUESTION_SQUARES.has(player.pos)) askMath(player); else nextTurn(); }
+
+  function roll(){ if(players.length < PLAYER_COUNT) return; rollBtn.disabled = true; diceBox.classList.add('shake'); // dice sound could be added
+    setTimeout(()=>{ diceBox.classList.remove('shake'); if(diceMode === 'fair'){ dice = Math.floor(Math.random()*6)+1; } else if(diceMode === 'high'){ dice = [4,5,6][Math.floor(Math.random()*3)]; } else if(diceMode === 'low'){ dice = [1,2,3][Math.floor(Math.random()*3)]; } else if(diceMode==='custom'){ dice = [6,6,5,6,4][Math.floor(Math.random()*5)]; }
+      diceBox.textContent = dice; const p = players[active]; animateStep(p, dice, ()=>{ if(!checkSnakeOrLadder(p)) afterMove(p); }); }, 320); }
+
+  function askMath(player){ const qPos = player.pos; const a = Math.floor(Math.random()*12)+1; const b = Math.floor(Math.random()*12)+1; const correct = a + b; modal.classList.add('active'); modalQ.textContent = `${a} + ${b} = ?`; modalI.value = ''; modalI.focus(); modalS.onclick = ()=>{ modal.classList.remove('active'); const val = Number(modalI.value); modalS.onclick = null; QUESTION_SQUARES.delete(qPos); if(isNaN(val) || val !== correct){ const punish = PUNISHMENTS[Math.floor(Math.random()*PUNISHMENTS.length)]; alert(`Hukuman: ${punish}`); player.pos = Math.max(1, player.pos - dice); renderPlayers(); } nextTurn(); }; }
+
+  function nextTurn(){ active = (active + 1) % PLAYER_COUNT; turnInfo.textContent = `Giliran: ${players[active].name}`; rollBtn.disabled = false; }
+  function resetRound(){ players.forEach(p=>p.pos = 1); renderPlayers(); active = 0; turnInfo.textContent = `Giliran: ${players[active] ? players[active].name : '-'}`; }
+  function updateLB(){ leaderboardEl.innerHTML = ''; players.forEach(p=>{ const e=document.createElement('div'); e.className='score'; e.textContent = `${p.name}: ${p.score || 0} menang`; leaderboardEl.appendChild(e); }); }
+
+  // Event wiring and lightweight helpers
+  startBtn.addEventListener('click', ()=>{
+    // collect inputs
+    const names = []; const files = [];
+    for(let i=0;i<PLAYER_COUNT;i++){ const n = document.getElementById(`p${i+1}`).value.trim() || `Player ${i+1}`; const f = document.getElementById(`icon${i+1}`).files[0] || null; names.push(n); files.push(f); }
+    players.length = 0; let pending = 0;
+    files.forEach((file,i)=>{ if(file){ pending++; const reader = new FileReader(); reader.onload = (e)=>{ players[i] = { name: names[i], pos:1, score:0, color: colors[i], icon: e.target.result }; pending--; if(pending===0) startGame(); }; reader.readAsDataURL(file); } else { players[i] = { name: names[i], pos:1, score:0, color: colors[i], icon: null }; } });
+    if(pending===0) startGame(); kelasLabel.textContent = `Kelas: ${kelasInput.value || '-'}`;
+  });
+
+  function startGame(){ buildBoard(); updateLB(); startScreen.classList.remove('active'); startBGM(); turnInfo.textContent = `Giliran: ${players[0].name}`; }
+
+  rollBtn.addEventListener('click', roll);
+  resetBtn.addEventListener('click', ()=>{ resetRound(); log('🔄 Ronde direset'); });
+  exportBtn.addEventListener('click', ()=>window.print());
+  menuBtn.addEventListener('click', ()=>{ stopBGM(); players.length = 0; active = 0; diceBox.textContent='-'; logEl.innerHTML=''; leaderboardEl.innerHTML=''; startScreen.classList.add('active'); boardEl.innerHTML=''; overlay.innerHTML=''; turnInfo.textContent='Giliran: -'; });
+
+  speedSlider.addEventListener('input', ()=>{ stepSpeed = Number(speedSlider.value); speedLabel.textContent = stepSpeed + ' ms / langkah'; });
+  diceBias.addEventListener('change', ()=>{ diceMode = diceBias.value; log('🎲 Mode dadu: ' + diceMode.toUpperCase()); });
+  toggleSoundBtn.addEventListener('click', ()=>{ soundEnabled = !soundEnabled; toggleSoundBtn.textContent = soundEnabled ? 'ON' : 'OFF'; if(soundEnabled) startBGM(); else bgm.pause(); });
+  volumeSlider.addEventListener('input', ()=>{ bgm.volume = Number(volumeSlider.value) * 0.5; });
+
+  // Throttled resize
+  let resizeTimer = null; window.addEventListener('resize', ()=>{ if(resizeTimer) cancelAnimationFrame(resizeTimer); resizeTimer = requestAnimationFrame(()=>{ computeCellCenters(); resizeTimer = null; }); });
+
+  // initial build
+  buildBoard();
+})();
+</script>
+</body>
+</html>
