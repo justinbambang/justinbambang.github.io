@@ -25,7 +25,30 @@ html, body {
     justify-content: center;
     z-index: 100;
 }
+.replay-btn {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 12px 35px;
 
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+
+    color: white;
+    cursor: pointer;
+
+    border-radius: 50px;
+
+    /* Gradient aesthetic */
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
+
+    /* Glow effect */
+    box-shadow:
+        0 0 10px rgba(255, 0, 255, 0.6),
+        0 0 20px rgba(0, 255, 255, 0.6);
+
+    transition: all 0.3s ease;
+}
 #start-btn {
     font-size: 40px;
     cursor: pointer;
@@ -262,6 +285,7 @@ html, body {
     .top-text p {
         font-size: 14px;
     }
+
 
 
 
